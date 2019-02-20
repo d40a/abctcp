@@ -7,16 +7,19 @@ classdef beecolony
         employed;
         onlookers;
         scout;
+        matrix;
     end
     
     methods
-        function obj = beecolony(instance, colonysize)
-            sz = length(instance);
+        %instans pair of points (could id of vertexes)
+        function obj = beecolony(instance, colonysize, matrix)
             obj.colonysize = colonysize;
-            obj.dimension = sz;
+            obj.dimension = length(instance);
             obj.colony = [];
-            for i=1:colonysize
-                obj.colony = [obj.colony tour(instance(randperm(obj.dimension),:))];
+            obj.matrix = matrix;
+            instance(randperm(2), :);
+            for i=1:obj.colonysize
+                obj.colony = [obj.colony tour(instance(randperm(obj.dimension)), matrix)];
             end
         end
         
@@ -48,7 +51,7 @@ classdef beecolony
             instance = obj.colony(1).cities;
             obj.scout = [];
             for i=1:ln
-                obj.scout = [obj.scout tour(instance(randperm(obj.dimension),:))];
+                obj.scout = [obj.scout tour(instance(randperm(obj.dimension)),obj.matrix)];
             end
         end
         
@@ -58,7 +61,7 @@ classdef beecolony
         
         function obj = updt_employed(obj,string)
             for i =1:obj.colonysize
-                obj.employed(i) = local_search(obj.employed(i),string);
+                obj.employed(i) = local_search(obj.employed(i),string, obj.matrix);
             end
         end
         
@@ -66,13 +69,13 @@ classdef beecolony
     
 end
 
-function solution = local_search(solution, search_algorithm)
+function solution = local_search(solution, search_algorithm,matrix)
     if nargin>0
         if nargin<2
             search_algorithm = 'two_opt'; %default algorithm
         end
         if strcmp(search_algorithm, 'two_opt')
-            solution = two_opt(solution);
+            solution = two_opt(solution,matrix);
         end
         if strcmp(search_algorithm, 'tabusearch')
             solution = tabusearch(solution);
